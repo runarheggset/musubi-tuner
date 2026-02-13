@@ -448,7 +448,23 @@ class NetworkTrainer:
         optimizer = None
         optimizer_class = None
 
-        if optimizer_type.endswith("8bit".lower()):
+        if optimizer_type == "prodigy_adv":
+            try:
+                from adv_optm.optim import Prodigy_adv
+            except ImportError as e:
+                raise ImportError(
+                    "Optimizer `prodigy_adv` requires the optional dependency `adv-optm`.\n"
+                    "Install it with:\n"
+                    "  pip install adv-optm\n"
+                    "Then re-run with:\n"
+                    "  --optimizer_type prodigy_adv"
+                ) from e
+
+            logger.info(f"use Prodigy_adv optimizer (adv_optm) | {optimizer_kwargs}")
+            optimizer_class = Prodigy_adv
+            optimizer = optimizer_class(trainable_params, lr=lr, **optimizer_kwargs)
+
+        elif optimizer_type.endswith("8bit".lower()):
             try:
                 import bitsandbytes as bnb
             except ImportError:
